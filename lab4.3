@@ -1,0 +1,27 @@
+function output_signal = my_fft_convolution(input_signal, impulse_response,P)
+x_padded = zeros(P,1);
+x_padded(1:length(input_signal)) = input_signal;
+h_padded = zeros(P,1);
+h_padded(1:length(impulse_response)) = impulse_response;
+tic
+Fx = fft(x_padded);
+Fh = fft(h_padded);
+Fy = Fx.*Fh; % note the use of element-wise multiplication
+output_signal = real(ifft(Fy)); % we need to take the real part to avoid any
+toc% floating point errors making the output complex 
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+input_signal = audioread('trumpet.wav');
+impulse_response = audioread('telephoneIR.wav');
+x = length(input_signal);
+h = length(impulse_response);
+y = x+h-1;
+p = nextpow2(y);
+P = 2^p;
+
+output_signal = my_fft_convolution(input_signal, impulse_response,P);
+Duration = length(output_signal)/22000;
+T = 0:1/22000:Duration;
+T = T(1:end-1);
+figure;
+plot(T,output_signal)
